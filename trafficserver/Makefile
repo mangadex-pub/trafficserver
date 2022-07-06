@@ -1,6 +1,6 @@
 TRAFFICSERVER_VERSION = 9.1.2
 BUILD_VERSION_REPOSHA = $(shell git rev-parse --short HEAD)
-TRAFFICSERVER_VERSION_SUFFIX = mangadex-$(BUILD_VERSION_REPOSHA)
+TRAFFICSERVER_VERSION_FULL = $(TRAFFICSERVER_VERSION)+mangadex-$(BUILD_VERSION_REPOSHA)
 
 TRAFFICSERVER_SOURCES = https://codeload.github.com/apache/trafficserver/tar.gz/$(TRAFFICSERVER_VERSION)
 TRAFFICSERVER_TARBALL = trafficserver-$(TRAFFICSERVER_VERSION).tar.gz
@@ -19,15 +19,16 @@ $(TRAFFICSERVER_BUILDIR): $(TRAFFICSERVER_TARBALL)
 	tar -C $(TRAFFICSERVER_BUILDIR) --strip-components=1 -xf "$(TRAFFICSERVER_TARBALL)"
 
 build: $(TRAFFICSERVER_BUILDIR)
-	exit 1
+	cd "$(TRAFFICSERVER_BUILDIR)" && autoreconf -if
+	cd "$(TRAFFICSERVER_BUILDIR)" && ./configure --with-build-number="$(TRAFFICSERVER_VERSION_FULL)" --prefix="$(TRAFFICSERVER_DESTDIR_ABS)"
+	$(MAKE) -C "$(TRAFFICSERVER_BUILDIR)" -j "$(shell nproc)"
 
 $(TRAFFICSERVER_DESTDIR): build
 	@if ! [ -d "$(TRAFFICSERVER_DESTDIR)" ]; then mkdir -v "$(TRAFFICSERVER_DESTDIR)"; fi
-	$(MAKE) -C "$(TRAFFICSERVER_DESTDIR)" -j "$(shell nproc)" DESTDIR="$(TRAFFICSERVER_DESTDIR_ABS)" install
+	$(MAKE) -C "$(TRAFFICSERVER_BUILDIR)" -j "$(shell nproc)" install
 
-# Take a moment to hate on how fucking shit the `tar` CLI is with me, especially regarding the awkward dance of path prefixes. Press S.
 $(TRAFFICSERVER_ARCHIVE): $(TRAFFICSERVER_DESTDIR)
-	tar -C "$(TRAFFICSERVER_DESTDIR)" -cjf "$(TRAFFICSERVER_ARCHIVE)" "opt"
+	tar -C "$(TRAFFICSERVER_DESTDIR)" -cjf "$(TRAFFICSERVER_ARCHIVE)" $(shell ls -1 $(TRAFFICSERVER_DESTDIR_ABS))
 
 clean:
 	rm -fv "$(TRAFFICSERVER_TARBALL)"
