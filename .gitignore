@@ -1,0 +1,6 @@
+**/dist
+**/src
+**/*.build
+**/*.dsc
+**/*.tar.gz
+**/*.xz
