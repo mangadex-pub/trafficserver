@@ -33,7 +33,8 @@ RUN apt -qq update && \
       debian-archive-keyring \
       hwloc \
       lua5.4 \
-      liblua5.4-0 && \
+      liblua5.4-0 \
+      libncursesw6 && \
     apt -qq -y --purge autoremove && \
     apt -qq -y clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/cache/* /var/log/*
@@ -48,3 +49,10 @@ RUN groupadd -r -g 999 mangadex && \
 
 USER mangadex
 WORKDIR /tmp
+
+ENV STDOUTLOG="/dev/stdout" \
+    STDERRLOG="/dev/stderr" \
+    TM_PIDFILE="/tmp/trafficserver_manager.lock" \
+    TS_PIDFILE="/tmp/trafficserver_server.lock"
+
+CMD ["/usr/local/bin/traffic_server"]
