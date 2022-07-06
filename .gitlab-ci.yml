@@ -1,0 +1,73 @@
+stages:
+  - build
+  - publish
+
+variables:
+  TZ: "UTC"
+  GIT_DEPTH: "1"
+  DEBIAN_CODENAME: "bullseye"
+  TRAFFICSERVER_VERSION: 9.1.2
+
+build:
+  image: registry.gitlab.com/mangadex-pub/debuilder/${DEBIAN_CODENAME}:main
+  stage: build
+  needs: [ ]
+  before_script:
+    - ./tool/setup-debian.sh
+  script:
+    - make -C "trafficserver" TRAFFICSERVER_VERSION="${TRAFFICSERVER_VERSION}"
+  artifacts:
+    expire_in: 7 days
+    paths: [ "trafficserver/trafficserver-dist.tar.gz" ]
+
+docker:
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [ "" ]
+  stage: publish
+  needs:
+    - job: build
+      artifacts: true
+  before_script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"gitlab-ci-token\",\"password\":\"$CI_JOB_TOKEN\"}}}" > /kaniko/.docker/config.json
+  script: |
+    set -eu
+
+    export JOB_TIMESTAMP="$(date -D '%Y-%m-%dT%H:%M:%S%Z' -d "$CI_JOB_STARTED_AT" +'%Y%m%d-%H%M')"
+
+    echo "Building image with"
+    echo "- ATS version: $TRAFFICSERVER_VERSION"
+    echo "- Debian codename: $DEBIAN_CODENAME"
+    echo "- Git commit hash: $CI_COMMIT_SHORT_SHA"
+    echo "- Build timestamp: $JOB_TIMESTAMP"
+
+    export IMAGE_TAG_UNIQUE="$CI_COMMIT_SHORT_SHA-$JOB_TIMESTAMP-$TRAFFICSERVER_VERSION"
+    export IMAGE_TAG_ROLLING_COMMIT="git-$CI_COMMIT_SHORT_SHA-$TRAFFICSERVER_VERSION"
+    export IMAGE_TAG_ROLLING_GITREF="$CI_COMMIT_REF_SLUG-$TRAFFICSERVER_VERSION"
+
+    export IMAGE_TAG_VERSIONS="$TRAFFICSERVER_VERSION-$DEBIAN_CODENAME"
+    if [ "$CI_COMMIT_REF_NAME" != "$CI_DEFAULT_BRANCH" ]; then
+      export IMAGE_TAG_VERSIONS="branch-$CI_COMMIT_REF_SLUG-$IMAGE_TAG_VERSIONS"
+      echo "Git reference $CI_COMMIT_REF_NAME is not the default branch. Rewriting git rolling tag as $IMAGE_TAG_VERSIONS"
+    fi
+
+    echo "***"
+    echo "Will build and push image as:"
+    echo "- $CI_REGISTRY_IMAGE:$IMAGE_TAG_UNIQUE"
+    echo "- $CI_REGISTRY_IMAGE:$IMAGE_TAG_ROLLING_COMMIT"
+    echo "- $CI_REGISTRY_IMAGE:$IMAGE_TAG_ROLLING_GITREF"
+    echo "- $CI_REGISTRY_IMAGE:$IMAGE_TAG_VERSIONS"
+    echo "***"
+
+    (
+      set -x;
+      /kaniko/executor \
+        --context . \
+        --dockerfile Dockerfile \
+        --destination "$CI_REGISTRY_IMAGE:$IMAGE_TAG_UNIQUE" \
+        --destination "$CI_REGISTRY_IMAGE:$IMAGE_TAG_ROLLING_COMMIT" \
+        --destination "$CI_REGISTRY_IMAGE:$IMAGE_TAG_ROLLING_GITREF" \
+        --destination "$CI_REGISTRY_IMAGE:$IMAGE_TAG_VERSIONS" \
+        --single-snapshot
+    )

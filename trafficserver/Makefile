@@ -22,6 +22,7 @@ build: $(TRAFFICSERVER_BUILDIR)
 	cd "$(TRAFFICSERVER_BUILDIR)" && autoreconf -if
 	cd "$(TRAFFICSERVER_BUILDIR)" && ./configure --with-build-number="+$(TRAFFICSERVER_BUILD_VERSION)"
 	$(MAKE) -C "$(TRAFFICSERVER_BUILDIR)" -j "$(shell nproc)"
+	$(MAKE) -C "$(TRAFFICSERVER_BUILDIR)" -j "$(shell nproc)" check
 
 $(TRAFFICSERVER_DESTDIR): build
 	@if ! [ -d "$(TRAFFICSERVER_DESTDIR)" ]; then mkdir -v "$(TRAFFICSERVER_DESTDIR)"; fi
