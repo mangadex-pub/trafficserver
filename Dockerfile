@@ -19,9 +19,6 @@ LABEL Name="Apache Traffic Server"
 LABEL Vendor="MangaDex"
 MAINTAINER MangaDex <opensource@mangadex.org>
 
-ARG CANONICAL_VERSION="local-SNAPSHOT"
-LABEL Version=${CANONICAL_VERSION}
-
 RUN apt -qq update && \
     apt -qq -y --no-install-recommends install \
       apt-utils \
@@ -42,3 +39,12 @@ RUN apt -qq update && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/cache/* /var/log/*
 
 COPY --chown=root:root --from=dists /tmp/trafficserver /
+
+ENV LD_LIBRARY_PATH "/usr/local/lib"
+RUN traffic_server --version
+
+RUN groupadd -r -g 999 mangadex && \
+    useradd -u 999 -r -g 999 mangadex
+
+USER mangadex
+WORKDIR /tmp
