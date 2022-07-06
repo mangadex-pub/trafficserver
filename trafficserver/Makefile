@@ -22,10 +22,12 @@ build: $(TRAFFICSERVER_BUILDIR)
 	cd "$(TRAFFICSERVER_BUILDIR)" && autoreconf -if
 	cd "$(TRAFFICSERVER_BUILDIR)" && ./configure --with-build-number="$(TRAFFICSERVER_VERSION_FULL)" --prefix="$(TRAFFICSERVER_DESTDIR_ABS)"
 	$(MAKE) -C "$(TRAFFICSERVER_BUILDIR)" -j "$(shell nproc)"
+	$(MAKE) -C "$(TRAFFICSERVER_BUILDIR)" -j "$(shell nproc)" check
 
 $(TRAFFICSERVER_DESTDIR): build
 	@if ! [ -d "$(TRAFFICSERVER_DESTDIR)" ]; then mkdir -v "$(TRAFFICSERVER_DESTDIR)"; fi
 	$(MAKE) -C "$(TRAFFICSERVER_BUILDIR)" -j "$(shell nproc)" install
+	"$(TRAFFICSERVER_DESTDIR)/bin/traffic_server" --version
 
 $(TRAFFICSERVER_ARCHIVE): $(TRAFFICSERVER_DESTDIR)
 	tar -C "$(TRAFFICSERVER_DESTDIR)" -cjf "$(TRAFFICSERVER_ARCHIVE)" $(shell ls -1 $(TRAFFICSERVER_DESTDIR_ABS))
