@@ -25,6 +25,7 @@ apt -qq -y --no-install-recommends install \
       libreadline-dev \
       libssl-dev \
       libsystemd-dev \
+      libtool \
       pkg-config \
       tar \
       zlib1g-dev
