@@ -6,7 +6,7 @@ variables:
   TZ: "UTC"
   GIT_DEPTH: "1"
   DEBIAN_CODENAME: "bullseye"
-  TRAFFICSERVER_VERSION: 9.1.2
+  TRAFFICSERVER_VERSION: 9.2.x
 
 build:
   image: registry.gitlab.com/mangadex-pub/debuilder/${DEBIAN_CODENAME}:main
