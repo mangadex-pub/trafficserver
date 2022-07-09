@@ -42,13 +42,15 @@ RUN apt -qq update && \
 
 COPY --chown=root:root --from=dists /tmp/trafficserver /
 
-ENV LD_LIBRARY_PATH "/usr/local/lib"
-RUN traffic_server --version
+# The script is all kinds of broken and should typically not be used
+# keep it if ever useful, but have it renamed
+RUN mv -fv /usr/bin/trafficserver /usr/bin/trafficserver.orig.sh
 
-RUN groupadd -r -g 999 mangadex && \
-    useradd -u 999 -r -g 999 mangadex
+RUN groupadd -r -g 999 mangadex && useradd -u 999 -r -g 999 mangadex
+RUN chown -v mangadex:mangadex /run/trafficserver /var/cache/trafficserver /var/log/trafficserver
 
 USER mangadex
 WORKDIR /tmp
 
-CMD ["/usr/local/bin/traffic_server"]
+RUN traffic_server --version
+CMD ["/usr/bin/traffic_manager"]

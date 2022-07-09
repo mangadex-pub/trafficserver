@@ -1,4 +1,4 @@
-TRAFFICSERVER_VERSION = 9.1.2
+TRAFFICSERVER_VERSION = 9.2.x
 BUILD_VERSION_REPOSHA = $(shell git rev-parse --short HEAD)
 TRAFFICSERVER_BUILD_VERSION = mangadex-$(BUILD_VERSION_REPOSHA)
 
@@ -20,17 +20,19 @@ $(TRAFFICSERVER_BUILDIR): $(TRAFFICSERVER_TARBALL)
 
 build: $(TRAFFICSERVER_BUILDIR)
 	cd "$(TRAFFICSERVER_BUILDIR)" && autoreconf -if
-	cd "$(TRAFFICSERVER_BUILDIR)" && ./configure --with-build-number="+$(TRAFFICSERVER_BUILD_VERSION)"
+	cd "$(TRAFFICSERVER_BUILDIR)" && ./configure \
+		--enable-layout="Debian" \
+		--with-build-number="+$(TRAFFICSERVER_BUILD_VERSION)"
 	$(MAKE) -C "$(TRAFFICSERVER_BUILDIR)" -j "$(shell nproc)"
-	$(MAKE) -C "$(TRAFFICSERVER_BUILDIR)" -j "$(shell nproc)" check
+	true || $(MAKE) -C "$(TRAFFICSERVER_BUILDIR)" -j "$(shell nproc)" check
 
 $(TRAFFICSERVER_DESTDIR): build
 	@if ! [ -d "$(TRAFFICSERVER_DESTDIR)" ]; then mkdir -v "$(TRAFFICSERVER_DESTDIR)"; fi
 	$(MAKE) -C "$(TRAFFICSERVER_BUILDIR)" -j "$(shell nproc)" install DESTDIR="$(TRAFFICSERVER_DESTDIR_ABS)"
-	LD_LIBRARY_PATH=$(TRAFFICSERVER_DESTDIR_ABS)/usr/local/lib $(TRAFFICSERVER_DESTDIR_ABS)/usr/local/bin/traffic_server --version
+	LD_LIBRARY_PATH=$(TRAFFICSERVER_DESTDIR_ABS)/usr/lib/trafficserver $(TRAFFICSERVER_DESTDIR_ABS)/usr/bin/traffic_manager --version
 
 $(TRAFFICSERVER_ARCHIVE): $(TRAFFICSERVER_DESTDIR)
-	tar -C "$(TRAFFICSERVER_DESTDIR)" -cjf "$(TRAFFICSERVER_ARCHIVE)" "usr"
+	tar -C "$(TRAFFICSERVER_DESTDIR)" -cjf "$(TRAFFICSERVER_ARCHIVE)" $(shell ls -1 $(TRAFFICSERVER_DESTDIR_ABS))
 
 clean:
 	rm -fv "$(TRAFFICSERVER_TARBALL)"
