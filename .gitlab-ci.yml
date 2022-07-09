@@ -2,7 +2,7 @@ stages:
   - build
   - publish
 
-variables:
+variables: &default-variables
   TZ: "UTC"
   GIT_DEPTH: "1"
   DEBIAN_CODENAME: "bullseye"
@@ -19,6 +19,12 @@ build:
   artifacts:
     expire_in: 7 days
     paths: [ "trafficserver/trafficserver-dist.tar.gz" ]
+  variables:
+    <<: *default-variables
+    KUBERNETES_CPU_REQUEST: 2
+    KUBERNETES_CPU_LIMIT: 6
+    KUBERNETES_MEMORY_REQUEST: 4Gi
+    KUBERNETES_MEMORY_LIMIT: 4Gi
 
 docker:
   image:
