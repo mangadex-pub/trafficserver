@@ -9,6 +9,8 @@ TRAFFICSERVER_DESTDIR = dist
 TRAFFICSERVER_DESTDIR_ABS = $(shell realpath $(TRAFFICSERVER_DESTDIR))
 TRAFFICSERVER_ARCHIVE = trafficserver-dist.tar.gz
 
+TRAFFICSERVER_RUN_TESTS = true
+
 all: build $(TRAFFICSERVER_DESTDIR) $(TRAFFICSERVER_ARCHIVE)
 
 $(TRAFFICSERVER_TARBALL):
@@ -24,7 +26,7 @@ build: $(TRAFFICSERVER_BUILDIR)
 		--enable-layout="Debian" \
 		--with-build-number="+$(TRAFFICSERVER_BUILD_VERSION)"
 	$(MAKE) -C "$(TRAFFICSERVER_BUILDIR)" -j "$(shell nproc)"
-	$(MAKE) -C "$(TRAFFICSERVER_BUILDIR)" -j "$(shell nproc)" check || true
+	if $(TRAFFICSERVER_RUN_TESTS); then $(MAKE) -C "$(TRAFFICSERVER_BUILDIR)" -j "$(shell nproc)" check; fi
 
 $(TRAFFICSERVER_DESTDIR): build
 	@if ! [ -d "$(TRAFFICSERVER_DESTDIR)" ]; then mkdir -v "$(TRAFFICSERVER_DESTDIR)"; fi
