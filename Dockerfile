@@ -31,6 +31,7 @@ RUN apt -qq update && \
       ca-certificates \
       curl \
       debian-archive-keyring \
+      dnsutils \
       hwloc \
       lua5.4 \
       liblua5.4-0 \
