@@ -47,13 +47,6 @@ COPY --chown=root:root --from=dists /tmp/trafficserver /
 # keep it if ever useful, but have it renamed
 RUN mv -fv /usr/bin/trafficserver /usr/bin/trafficserver.orig.sh
 
-RUN groupadd -r -g 999 mangadex && \
-    useradd -u 999 -r -g 999 mangadex && \
-    usermod -a -G tty mangadex
-
-RUN chown -v mangadex:mangadex /run/trafficserver /var/cache/trafficserver /var/log/trafficserver
-
-USER mangadex
 WORKDIR /tmp
 
 RUN traffic_server --version
