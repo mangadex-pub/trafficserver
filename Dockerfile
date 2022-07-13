@@ -51,7 +51,16 @@ RUN groupadd -r -g 999 mangadex && \
     useradd -u 999 -r -g 999 mangadex && \
     usermod -a -G tty mangadex
 
-RUN chown -v mangadex:mangadex /run/trafficserver /var/cache/trafficserver /var/log/trafficserver
+# Until https://github.com/apache/trafficserver/issues/8955 is fixed, pull the old nginx docker tricks
+RUN ln -sv /dev/stderr /var/log/trafficserver/manager.log && \
+    ln -sv /dev/stderr /var/log/trafficserver/diags.log && \
+    ln -sv /dev/stderr /var/log/trafficserver/error.log && \
+    ln -sv /dev/stdout /var/log/trafficserver/traffic.log
+
+RUN chown -v -R mangadex:mangadex \
+      /run/trafficserver \
+      /var/cache/trafficserver \
+      /var/log/trafficserver
 
 USER mangadex
 WORKDIR /tmp
