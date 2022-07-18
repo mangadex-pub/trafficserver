@@ -6,6 +6,8 @@ variables: &default-variables
   TZ: "UTC"
   GIT_DEPTH: "1"
   DEBIAN_CODENAME: "bullseye"
+  KUBERNETES_MEMORY_REQUEST: 4Gi
+  KUBERNETES_MEMORY_LIMIT: 4Gi
 
 .vars-9.1: &vars-9_1
   TRAFFICSERVER_VERSION: 9.1.2
