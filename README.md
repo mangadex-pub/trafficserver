@@ -17,10 +17,18 @@ confidence in them ourselves.
 docker run -it \
     -v /path/to/etc/trafficserver:/etc/trafficserver:ro \
     -p "8080:8080" \
-    registry.gitlab.com/mangadex-pub/trafficserver:9.2.x-bullseye
+    registry.gitlab.com/mangadex-pub/trafficserver:9.1.2-bullseye
 ```
 
+The following ATS versions are available:
+
+- 9.1.2
+- 9.2.x (development branch)
+
 ## How to make logging work
+
+You need to use a 9.2.x line image. And it seems prone to issues atm,
+see: https://github.com/apache/trafficserver/issues/8955
 
 ATS' choices when it comes to log handling are ~~very irritating~~ rather old
 school. As such, to obtain a decent "container-native" result (ie all logs being

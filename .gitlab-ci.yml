@@ -6,9 +6,14 @@ variables: &default-variables
   TZ: "UTC"
   GIT_DEPTH: "1"
   DEBIAN_CODENAME: "bullseye"
+
+.vars-9.1: &vars-9_1
+  TRAFFICSERVER_VERSION: 9.1.2
+
+.vars-9.2: &vars-9_2
   TRAFFICSERVER_VERSION: 9.2.x
 
-build:
+.build: &build
   image: registry.gitlab.com/mangadex-pub/debuilder/${DEBIAN_CODENAME}:main
   stage: build
   needs: [ ]
@@ -26,14 +31,23 @@ build:
     KUBERNETES_MEMORY_REQUEST: 4Gi
     KUBERNETES_MEMORY_LIMIT: 4Gi
 
-docker:
+build:9.1:
+  <<: *build
+  variables:
+    <<: *default-variables
+    <<: *vars-9_1
+
+build:9.2:
+  <<: *build
+  variables:
+    <<: *default-variables
+    <<: *vars-9_2
+
+.docker: &docker
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [ "" ]
   stage: publish
-  needs:
-    - job: build
-      artifacts: true
   before_script:
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"gitlab-ci-token\",\"password\":\"$CI_JOB_TOKEN\"}}}" > /kaniko/.docker/config.json
@@ -77,3 +91,22 @@ docker:
         --destination "$CI_REGISTRY_IMAGE:$IMAGE_TAG_VERSIONS" \
         --single-snapshot
     )
+
+
+docker:9.1:
+  <<: *docker
+  needs:
+    - job: build:9.1
+      artifacts: true
+  variables:
+    <<: *default-variables
+    <<: *vars-9_1
+
+docker:9.2:
+  <<: *docker
+  needs:
+    - job: build:9.2
+      artifacts: true
+  variables:
+    <<: *default-variables
+    <<: *vars-9_2
