@@ -60,7 +60,11 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: trafficserver-${{ matrix.ats_version }}.tar.gz
-          path: trafficserver/trafficserver-dist.tar.gz
+          path: trafficserver/trafficserver-dist-${{ matrix.ats_version }}.tar.gz.gzip
+
+      # Brainworms
+      - name: Decompress Gzipped tarball
+        run: unzip -d trafficserver trafficserver/trafficserver-dist-${{ matrix.ats_version }}.tar.gz.zip
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
