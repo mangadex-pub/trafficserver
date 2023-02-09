@@ -23,17 +23,13 @@ RUN apt -qq update && \
       apt-utils \
       apt-transport-https \
       ca-certificates \
-      openssl && \
-    sed -i -e 's/http\:/https\:/g' /etc/apt/sources.list && \
-    apt -qq update && \
-    apt -qq -y --no-install-recommends install \
-      ca-certificates \
       curl \
       dnsutils \
       hwloc \
       lua5.4 \
       liblua5.4-0 \
       libncursesw6 \
+      openssl \
       procps && \
     apt -qq -y --purge autoremove && \
     apt -qq -y clean && \
