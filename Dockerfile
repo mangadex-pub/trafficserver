@@ -1,4 +1,4 @@
-FROM docker.io/library/debian:bullseye as base
+FROM docker.io/library/ubuntu:22.04 as base
 
 ENV DEBIAN_FRONTEND "noninteractive"
 ENV TZ "UTC"
@@ -17,7 +17,6 @@ FROM base
 
 LABEL Name="Apache Traffic Server"
 LABEL Vendor="MangaDex"
-MAINTAINER MangaDex <opensource@mangadex.org>
 
 RUN apt -qq update && \
     apt -qq -y --no-install-recommends install \
@@ -30,7 +29,7 @@ RUN apt -qq update && \
     apt -qq -y --no-install-recommends install \
       ca-certificates \
       curl \
-      debian-archive-keyring \
+      ubuntu-archive-keyring \
       dnsutils \
       hwloc \
       lua5.4 \

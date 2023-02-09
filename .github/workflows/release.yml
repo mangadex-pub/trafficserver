@@ -1,0 +1,88 @@
+on:
+  push:
+    branches: [ "main" ]
+    tags: [ "*" ]
+  schedule:
+    - cron: "0 10 * * 1"
+
+env:
+  REGISTRY: "ghcr.io"
+  IMAGE_NAME: "${{ github.repository }}"
+
+.ats_versions_matrix: &ats_versions_matrix
+  matrix:
+    include:
+      - ats_version: 9.1.3
+      - ats_version: 9.2.0
+
+.job_defaults: &job_defaults
+  strategy:
+    matrix: *ats_versions_matrix
+
+  runs-on: ubuntu-latest
+  permissions:
+    contents: read
+    packages: write
+
+jobs:
+  build:
+    <<: *job_defaults
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install build dependencies
+        run: ./tool/setup-debian.sh
+
+      - name: Build ATS
+        run: make -j$(nproc) -C "trafficserver" TRAFFICSERVER_VERSION="${{ matrix.ats_version }}" TRAFFICSERVER_RUN_TESTS=false
+
+      - name: Archive dist
+        uses: actions/upload-artifact@v3
+        with:
+          name: trafficserver-${{ matrix.ats_version }}.tar.gz
+          path: trafficserver/trafficserver-dist.tar.gz
+
+  docker:
+    <<: *job_defaults
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Download ATS version dist
+        uses: actions/download-artifact@v3
+        with:
+          name: trafficserver-${{ matrix.ats_version }}.tar.gz
+          path: trafficserver/trafficserver-dist.tar.gz
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,event=push,enable=true,prefix=branch-{{ branch }}-${{ matrix.ats_version }}-git-,format=short
+            type=sha,event=push,enable={{ is_default_branch }},prefix=${{ matrix.ats_version }}-,format=short
+            type=raw,event=push,enable={{ is_default_branch }},value=${{ matrix.ats_version }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          target: ${{ matrix.target }}
