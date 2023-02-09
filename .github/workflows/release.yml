@@ -60,7 +60,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: trafficserver-${{ matrix.ats_version }}.tar.gz
-          path: trafficserver/trafficserver-dist-${{ matrix.ats_version }}.tar.gz.gzip
+          path: trafficserver/trafficserver-dist-${{ matrix.ats_version }}.tar.gz.zip
 
       # Brainworms
       - name: Decompress Gzipped tarball
