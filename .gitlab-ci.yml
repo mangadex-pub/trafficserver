@@ -20,7 +20,7 @@ variables: &default-variables
   before_script:
     - ./tool/setup-debian.sh
   script:
-    - make -C "trafficserver" TRAFFICSERVER_VERSION="${TRAFFICSERVER_VERSION}" TRAFFICSERVER_RUN_TESTS=false
+    - 'make -j$(nproc) -C "trafficserver" TRAFFICSERVER_VERSION="${TRAFFICSERVER_VERSION}" TRAFFICSERVER_RUN_TESTS=false'
   artifacts:
     expire_in: 7 days
     paths: [ "trafficserver/trafficserver-dist.tar.gz" ]
