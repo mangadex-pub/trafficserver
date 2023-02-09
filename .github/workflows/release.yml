@@ -27,7 +27,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install build dependencies
-        run: ./tool/setup-debian.sh
+        run: sudo ./tool/setup-debian.sh
 
       - name: Build ATS
         run: make -j$(nproc) -C "trafficserver" TRAFFICSERVER_VERSION="${{ matrix.ats_version }}" TRAFFICSERVER_RUN_TESTS=false
@@ -39,6 +39,8 @@ jobs:
           path: trafficserver/trafficserver-dist.tar.gz
 
   docker:
+    needs: [ "build" ]
+
     strategy:
       matrix:
         include:
