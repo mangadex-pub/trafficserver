@@ -60,11 +60,21 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: trafficserver-${{ matrix.ats_version }}.tar.gz
-          path: trafficserver/trafficserver-dist-${{ matrix.ats_version }}.tar.gz.zip
+          path: trafficserver/trafficserver-dist-${{ matrix.ats_version }}.tar.gz
 
       # Brainworms
       - name: Decompress Gzipped tarball
-        run: unzip -d trafficserver trafficserver/trafficserver-dist-${{ matrix.ats_version }}.tar.gz.zip
+        run: |
+          cd trafficserver
+          ls -al
+          FILENAME="trafficserver-dist-${{ matrix.ats_version }}.tar.gz"
+          if file $FILENAME | grep -i 'zip archive'; then
+            echo "Zipfile found, decompressing it"
+            unzip $FILENAME
+          else
+            echo "Tarfile found, renaming it"
+            mv -fv $FILENAME trafficserver-dist.tar.gz
+          fi
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
