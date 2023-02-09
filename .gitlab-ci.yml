@@ -28,9 +28,9 @@ variables: &default-variables
     paths: [ "trafficserver/trafficserver-dist.tar.gz" ]
   variables:
     <<: *default-variables
-    KUBERNETES_CPU_REQUEST: 2
-    KUBERNETES_CPU_LIMIT: 6
-    KUBERNETES_MEMORY_REQUEST: 4Gi
+    KUBERNETES_CPU_REQUEST: 1000m
+    KUBERNETES_CPU_LIMIT: 8000m
+    KUBERNETES_MEMORY_REQUEST: 2Gi
     KUBERNETES_MEMORY_LIMIT: 4Gi
 
 build:9.1:
