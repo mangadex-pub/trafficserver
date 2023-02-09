@@ -11,7 +11,7 @@ RUN apt -qq update && apt install -qq -y bzip2
 
 WORKDIR /tmp/trafficserver
 COPY ./trafficserver/trafficserver-dist.tar.gz /tmp/trafficserver/trafficserver.tar.gz
-RUN ls -alh && tar xf trafficserver.tar.gz && rm -v trafficserver.tar.gz
+RUN find . && tar xf trafficserver.tar.gz && rm -v trafficserver.tar.gz
 
 FROM base
 
@@ -29,7 +29,6 @@ RUN apt -qq update && \
     apt -qq -y --no-install-recommends install \
       ca-certificates \
       curl \
-      ubuntu-archive-keyring \
       dnsutils \
       hwloc \
       lua5.4 \
