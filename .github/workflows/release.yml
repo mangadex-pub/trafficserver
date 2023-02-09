@@ -9,24 +9,19 @@ env:
   REGISTRY: "ghcr.io"
   IMAGE_NAME: "${{ github.repository }}"
 
-.ats_versions_matrix: &ats_versions_matrix
-  matrix:
-    include:
-      - ats_version: 9.1.3
-      - ats_version: 9.2.0
-
-.job_defaults: &job_defaults
-  strategy:
-    matrix: *ats_versions_matrix
-
-  runs-on: ubuntu-latest
-  permissions:
-    contents: read
-    packages: write
-
 jobs:
   build:
-    <<: *job_defaults
+    strategy:
+      matrix:
+        include:
+          - ats_version: 9.1.3
+          - ats_version: 9.2.0
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -44,7 +39,17 @@ jobs:
           path: trafficserver/trafficserver-dist.tar.gz
 
   docker:
-    <<: *job_defaults
+    strategy:
+      matrix:
+        include:
+          - ats_version: 9.1.3
+          - ats_version: 9.2.0
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
