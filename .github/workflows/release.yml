@@ -71,8 +71,13 @@ jobs:
           if file $FILENAME | grep -i 'zip archive'; then
             echo "Zipfile found, decompressing it"
             unzip $FILENAME
+            rm -v $FILENAME
+          elif [ -d "$FILENAME" ]; then
+            echo "Artifact is a directory, copying underlying file"
+            mv -fv $FILENAME/trafficserver-dist.tar.gz ./trafficserver-dist.tar.gz
+            rm -rfv $FILENAME
           else
-            echo "Tarfile found, renaming it"
+            echo "Non-directory non-zip file found, rename and pray, because those actions are shit"
             mv -fv $FILENAME trafficserver-dist.tar.gz
           fi
 
