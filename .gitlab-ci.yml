@@ -10,10 +10,10 @@ variables: &default-variables
   KUBERNETES_MEMORY_LIMIT: 4Gi
 
 .vars-9.1: &vars-9_1
-  TRAFFICSERVER_VERSION: 9.1.2
+  TRAFFICSERVER_VERSION: 9.1.3
 
 .vars-9.2: &vars-9_2
-  TRAFFICSERVER_VERSION: 9.2.x
+  TRAFFICSERVER_VERSION: 9.2.0
 
 .build: &build
   image: registry.gitlab.com/mangadex-pub/debuilder/${DEBIAN_CODENAME}:main
